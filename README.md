@@ -188,6 +188,12 @@ The pause target is a hint, not a hard real-time guarantee. Tighter pause goals 
 
 The `/work` endpoint creates per-request objects and arrays plus a request-scoped bean. The `/cache` endpoint contains an intentional process-wide retention bug for diagnosis.
 
+```
+java -Xms512m -Xmx512m -XX:+UseG1GC \
+  -Xlog:gc*,gc+age=trace,safepoint:file=build/gc-spring.log:time,uptime,pid,level,tags:filecount=5,filesize=100m \
+  -jar target/jvm-memory-laboratory-1.0.0.jar
+```
+
 Run a load test:
 
 ```bash
