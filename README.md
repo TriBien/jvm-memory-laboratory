@@ -30,10 +30,11 @@ mvn clean package
 Run the non-Spring experiments:
 
 ```bash
-java -cp target/classes com.example.jvmlab.AllocationStorm 10000000 256
-java -cp target/jvm-memory-laboratory-1.0.0.jar com.example.jvmlab.PrimitiveVsObject 1000000
-java -cp target/jvm-memory-laboratory-1.0.0.jar com.example.jvmlab.CacheRetention leak 200 262144
-java -cp target/jvm-memory-laboratory-1.0.0.jar com.example.jvmlab.CacheRetention fixed 200 262144
+CP="target/classes:target/lib/*"
+java -cp "$CP" com.example.jvmlab.AllocationStorm 10000000 256
+java -cp "$CP" com.example.jvmlab.PrimitiveVsObject 1000000
+java -cp "$CP" com.example.jvmlab.CacheRetention leak 200 262144
+java -cp "$CP" com.example.jvmlab.CacheRetention fixed 200 262144
 ```
 
 Run the Spring application:
@@ -93,7 +94,7 @@ Do not start with “which collector is faster?” Start with “which workload 
 Purpose: expose object headers, references, boxing, and alignment.
 
 ```bash
-java -cp target/jvm-memory-laboratory-1.0.0.jar \
+java -cp "target/classes:target/lib/*" \
   com.example.jvmlab.PrimitiveVsObject 1000000
 ```
 
@@ -111,19 +112,22 @@ Leak mode:
 
 ```bash
 java -Xms256m -Xmx256m -XX:+UseG1GC \
-  -cp target/jvm-memory-laboratory-1.0.0.jar \
-  com.example.jvmlab.CacheRetention leak 200 1048576
+  -cp "target/classes:target/lib/*" \
+  com.example.jvmlab.CacheRetention leak 100 1048576
 ```
 
 Fixed mode:
 
 ```bash
 java -Xms256m -Xmx256m -XX:+UseG1GC \
-  -cp target/jvm-memory-laboratory-1.0.0.jar \
-  com.example.jvmlab.CacheRetention fixed 200 1048576
+  -cp "target/classes:target/lib/*" \
+  com.example.jvmlab.CacheRetention fixed 100 1048576
 ```
 
 Inspect a running process:
+``` 
+ps aux | grep java 
+```
 
 ```bash
 jcmd <pid> GC.class_histogram > build/histo.txt
@@ -138,13 +142,18 @@ The intended diagnosis is equivalent to:
 
 `GC root -> static field -> cache map -> entry -> byte[]`
 
++ Import heap dump build/cache-retention.hprof in Eclipse MAT
++ Open Dominator tree
++ Right click on biggest objects -> Path to GC root -> Exclude soft/weaak/phantom references => find the strong reference object
+
+
 ## Experiment 4 — GC tuning
 
 Baseline G1:
 
 ```bash
 java -Xms512m -Xmx512m -XX:+UseG1GC \
-  -cp target/jvm-memory-laboratory-1.0.0.jar \
+  -cp "target/classes:target/lib/*" \
   com.example.jvmlab.AllocationStorm 20000000 512
 ```
 
@@ -152,7 +161,7 @@ Tighter pause goal:
 
 ```bash
 java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=50 \
-  -cp target/jvm-memory-laboratory-1.0.0.jar \
+  -cp "target/classes:target/lib/*" \
   com.example.jvmlab.AllocationStorm 20000000 512
 ```
 
@@ -160,7 +169,7 @@ Relaxed pause goal:
 
 ```bash
 java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
-  -cp target/jvm-memory-laboratory-1.0.0.jar \
+  -cp "target/classes:target/lib/*" \
   com.example.jvmlab.AllocationStorm 20000000 512
 ```
 
