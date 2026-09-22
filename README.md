@@ -153,27 +153,36 @@ Baseline G1:
 
 ```bash
 java -Xms512m -Xmx512m -XX:+UseG1GC \
+  -Xlog:gc*,gc+age=trace,safepoint:file=build/g1-baseline.log:time,uptime,pid,level,tags:filecount=5,filesize=100m \
   -cp "target/classes:target/lib/*" \
-  com.example.jvmlab.AllocationStorm 20000000 512
+  com.example.jvmlab.AllocationStorm 20000000 512 \
+&& python3 scripts/gc_analyze.py build/g1-baseline.log
 ```
 
-Tighter pause goal:
+Tighter pause goal 10ms:
 
 ```bash
-java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=50 \
+java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=10 \
+  -Xlog:gc*,gc+age=trace,safepoint:file=build/g1-10ms.log:time,uptime,pid,level,tags:filecount=5,filesize=100m \
   -cp "target/classes:target/lib/*" \
-  com.example.jvmlab.AllocationStorm 20000000 512
+  com.example.jvmlab.AllocationStorm 20000000 512 \
+&& python3 scripts/gc_analyze.py build/g1-10ms.log
 ```
 
 Relaxed pause goal:
 
 ```bash
 java -Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
+  -Xlog:gc*,gc+age=trace,safepoint:file=build/g1-200ms.log:time,uptime,pid,level,tags:filecount=5,filesize=100m \
   -cp "target/classes:target/lib/*" \
-  com.example.jvmlab.AllocationStorm 20000000 512
+  com.example.jvmlab.AllocationStorm 20000000 512 \
+&& python3 scripts/gc_analyze.py build/g1-200ms.log
 ```
 
 The pause target is a hint, not a hard real-time guarantee. Tighter pause goals can trade against throughput.
+
+=> Smaller GC pause time (low latency), higher GC CPU (spend more CPU to GC) -> low throughput (less CPU for main app thread, process less work)
+
 
 ## Production mapping — Spring request allocation
 
